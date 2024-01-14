@@ -3,6 +3,12 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import { pika } from "./utils/pika";
 import { User } from "./utils/types";
+import Redis from "ioredis";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const redis = new Redis(process.env.REDIS_URL as string);
 
 const server = http.createServer();
 const io = new Server(server, {
@@ -15,8 +21,10 @@ const io = new Server(server, {
 let users: Record<string, User> = {};
 let waitingQueue: string[] = [];
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log("a user connected:", socket.id);
+
+  redis.set(`user:${socket.id}:status`, "online");
 
   socket.on(
     "register",
@@ -38,6 +46,8 @@ io.on("connection", (socket) => {
     if (users[socket.id]) {
       delete users[socket.id];
       waitingQueue = waitingQueue.filter((id) => id !== socket.id);
+      redis.del(`user:${socket.id}:status`);
+
       console.log("user disconnected", socket.id);
     }
   });

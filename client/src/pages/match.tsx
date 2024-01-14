@@ -15,7 +15,7 @@ import { Message } from "@/utils/types";
 import { signOut, useSession } from "next-auth/react";
 import Chat from "@/components/chat";
 import { Center } from "@/components/center";
-import { Search } from "lucide-react";
+import { Dot, Search } from "lucide-react";
 import { SimpleGrid, Box, Text } from "@chakra-ui/react";
 import { fetchSpotifyAPI } from "@/lib/services/spotify";
 import { Account, Artist } from "@prisma/client";
@@ -69,7 +69,7 @@ export default function MatchPage({
         });
 
         songPlayed(currentRoom as string, async (song: string) => {
-          await spotify?.playSong(song);
+          await spotify?.playSong("spotify:track:1gT5TGwbkkkUliNzHRIGi1");
         });
       }
     );
@@ -132,31 +132,50 @@ export default function MatchPage({
       </div>
       <center>
         {!currentRoom && (
-          <SimpleGrid
-            justifyItems={"center"}
-            columns={3}
-            spacingX="60px"
-            width={775}
-            height={500}
-            padding={20}
-          >
-            {Object.keys(friendList).map((keyName, i) => (
-              <Box
-                key={i}
-                borderColor="gray"
-                height="60px"
-                width="150px"
-                borderRadius="lg"
-                maxW="sm"
-                borderWidth="1px"
-                overflow="hidden"
-              >
-                <Text mt={4} fontWeight={"semibold"} color="black">
-                  {friendList[i]}
-                </Text>
-              </Box>
-            ))}
-          </SimpleGrid>
+          <div>
+            <SimpleGrid
+              justifyItems={"center"}
+              columns={3}
+              spacingX="60px"
+              width={775}
+              height={500}
+              padding={20}
+            >
+              {Object.keys(friendList).map((keyName, i) => (
+                <Box
+                  key={i}
+                  borderColor="gray"
+                  height="100px"
+                  width="150px"
+                  borderRadius="lg"
+                  maxW="sm"
+                  borderWidth="1px"
+                  overflow="hidden"
+                >
+                  <Text
+                    mt={4}
+                    fontWeight={"semibold"}
+                    color="black"
+                    className="flex flex-col items-center justify-center"
+                  >
+                    <div className="flex text-xs items-center mr-3">
+                      {i % 5 === 0 ? (
+                        <>
+                          {" "}
+                          <Dot className="text-green-500" /> Online
+                        </>
+                      ) : (
+                        <>
+                          <Dot className="text-yellow-500" /> Idle
+                        </>
+                      )}
+                    </div>{" "}
+                    {friendList[i]}
+                  </Text>
+                </Box>
+              ))}
+            </SimpleGrid>
+          </div>
         )}
       </center>
     </div>
