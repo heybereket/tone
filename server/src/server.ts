@@ -44,75 +44,66 @@ io.on("connection", (socket) => {
 });
 
 async function tryMatchmaking() {
-  for (let i = 0; i < waitingQueue.length; i++) {
-    const userId = waitingQueue[i];
+  while (waitingQueue.length >= 2) {
+    const user1Id = waitingQueue.shift();
+    const user2Id = waitingQueue.shift();
 
-    if (!users[userId]) {
-      // Skip if the user doesn't exist (perhaps they disconnected)
+    if (!user1Id || !user2Id) {
       continue;
     }
 
-    const currentUserGenres = users[userId].genres;
+    if (!users[user1Id] || !users[user2Id]) {
+      // If either user is not available, continue with the next iteration
+      continue;
+    }
 
-    for (let j = i + 1; j < waitingQueue.length; j++) {
-      const potentialMatchId = waitingQueue[j];
+    const user1 = users[user1Id];
+    const user2 = users[user2Id];
 
-      if (!users[potentialMatchId]) {
-        // Skip if the potential match doesn't exist (perhaps they disconnected)
-        continue;
+    const commonGenres = user1.genres.filter((genre) =>
+      user2.genres.includes(genre)
+    );
+
+    if (commonGenres.length > 0) {
+      const roomID = pika.gen("ch");
+
+      // Fetch top song using the accessToken of the first user (user1)
+      const topSong: any = await fetch(
+        `https://api.spotify.com/v1/recommendations/?limit=1&seed_genres=${commonGenres.join(
+          ","
+        )}&seed_artists=${user1.artists.join(",")}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user1.accessToken}`,
+          },
+        }
+      ).then((res) => res.json());
+
+      if (topSong.tracks && topSong.tracks.length > 0) {
+        // Join both users to the room
+        user1.socket.join(roomID);
+        user2.socket.join(roomID);
+        // Notify both users
+        user1.socket.emit("matched", roomID);
+        user2.socket.emit("matched", roomID);
+
+        // Play song for everyone in the room
+        io.to(roomID).emit("play_song", topSong.tracks[0].uri);
+      } else {
+        console.error(
+          "No tracks found in topSong or topSong.tracks is undefined"
+        );
       }
 
-      const potentialMatchGenres = users[potentialMatchId].genres;
-
-      const commonGenres = currentUserGenres.filter((genre) =>
-        potentialMatchGenres.includes(genre)
+      console.log(
+        `Matched users ${user1Id} and ${user2Id} in room ${roomID} with common genres: ${commonGenres.join(
+          ", "
+        )}`
       );
-
-      if (commonGenres.length > 0) {
-        const roomID = pika.gen("ch");
-        const user = users[userId];
-
-        const topSong: any = await fetch(
-          `https://api.spotify.com/v1/recommendations/?limit=1&seed_genres=${user.genres.join(
-            ","
-          )}&seed_artists=${user.artists.join(",")}`,
-          {
-            headers: {
-              Authorization: `Bearer ${user.accessToken}`,
-            },
-          }
-        ).then((res) => res.json());
-
-        if (users[userId] && users[potentialMatchId]) {
-          users[userId].socket?.join(roomID); // Use optional chaining to avoid errors
-          users[potentialMatchId].socket?.join(roomID); // Use optional chaining to avoid errors
-        }
-
-        if (users[userId]) {
-          users[userId].socket?.emit("matched", roomID); // Use optional chaining to avoid errors
-        }
-
-        if (users[potentialMatchId]) {
-          users[potentialMatchId].socket?.emit("matched", roomID); // Use optional chaining to avoid errors
-        }
-
-        if (topSong && topSong.tracks && topSong.tracks.length > 0) {
-          io.to(roomID).emit("play_song", topSong.tracks[0].uri);
-        } else {
-          console.error(
-            "No tracks found in topSong or topSong.tracks is undefined"
-          );
-        }
-        console.log(
-          `Matched users in room ${roomID} with common genres: ${commonGenres.join(
-            ", "
-          )}`
-        );
-
-        waitingQueue = waitingQueue.filter(
-          (id) => id !== userId && id !== potentialMatchId
-        );
-        return;
+    } else {
+      if (user1Id && user2Id) {
+        // If no common genres, re-add users to the waiting queue
+        waitingQueue.push(user1Id, user2Id);
       }
     }
   }
