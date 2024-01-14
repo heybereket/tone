@@ -16,16 +16,8 @@ import Chat from "@/components/chat";
 import { Center } from "@/components/center";
 import { Search } from "lucide-react";
 import { SimpleGrid, Box, Text } from "@chakra-ui/react";
-import { fetchSpotifyAPI } from "@/lib/services/spotify";
-import { Account, User } from "@prisma/client";
 
-export default function MatchPage({
-  user,
-  account,
-}: {
-  user: User;
-  account: Account;
-}) {
+export default function MatchPage({ genres }: { genres: string[] }) {
   const { data } = useSession();
 
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
@@ -41,7 +33,7 @@ export default function MatchPage({
     "Bereket",
     "Roozbeh",
   ]);
-//   const [song, setSong] = useState(null);
+  //   const [song, setSong] = useState(null);
 
   useEffect(() => {
     connectSocket();
@@ -52,7 +44,7 @@ export default function MatchPage({
   }, []);
 
   const handleRegister = () => {
-    registerUser(user.topGenres, (roomId: string) => {
+    registerUser(genres, (roomId: string) => {
       setCurrentRoom(roomId);
       subscribeToRoom(roomId, (data: Message) => {
         setMessages((prev) => [...prev, data]);
@@ -67,24 +59,24 @@ export default function MatchPage({
     }
   };
 
-//   useEffect(() => {
-//     if (currentRoom) {
-//       const fetchTopSong = async () => {
-//         const topSong = await fetchSpotifyAPI({
-//           token: account.access_token as string,
-//           endpoint: `v1/recommendations/?limit=1&seed_genres=${user.topGenres.join(
-//             ","
-//           )}`,
-//         });
+  //   useEffect(() => {
+  //     if (currentRoom) {
+  //       const fetchTopSong = async () => {
+  //         const topSong = await fetchSpotifyAPI({
+  //           token: account.access_token as string,
+  //           endpoint: `v1/recommendations/?limit=1&seed_genres=${user.topGenres.join(
+  //             ","
+  //           )}`,
+  //         });
 
-//         setSong(topSong);
-//       };
+  //         setSong(topSong);
+  //       };
 
-//       fetchTopSong();
-//     }
-//   }, [account.access_token, currentRoom, user.topGenres]);
+  //       fetchTopSong();
+  //     }
+  //   }, [account.access_token, currentRoom, user.topGenres]);
 
-//   console.log(song);
+  //   console.log(song);
 
   return (
     <div>
@@ -120,15 +112,15 @@ export default function MatchPage({
           )}
         </div>
       </div>
-      <Text fontWeight={'semibold'} align={'center'}>Your friends.</Text>
       <center>
+        {/* <Text fontWeight={'semibold'} align={'center'}>Your friends.</Text> */}
         <SimpleGrid
-          alignItems={"center"}
+          justifyItems={"center"}
           columns={3}
           spacingX="60px"
           width={750}
           height={500}
-          padding={10}
+          padding={20}
         >
           {Object.keys(friendList).map((keyName, i) => (
             <Box
@@ -167,16 +159,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   });
 
-  const account = await prisma.account.findFirst({
-    where: {
-      userId: session.user.id as string,
-    },
-  });
+  //   const account = await prisma.account.findFirst({
+  //     where: {
+  //       userId: session.user.id as string,
+  //     },
+  //   });
 
   return {
     props: {
-      user,
-      account,
+      genres: user?.topGenres ?? [],
     },
   };
 };

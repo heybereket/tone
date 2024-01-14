@@ -24,9 +24,12 @@ io.on("connection", (socket) => {
     tryMatchmaking();
   });
 
-  socket.on("send_message", (message: string, roomId: string) => {
-    io.to(roomId).emit("receive_message", message);
-  });
+  socket.on(
+    "send_message",
+    (message: string, sender: string, roomId: string) => {
+      io.to(roomId).emit("receive_message", message, sender);
+    }
+  );
 
   socket.on("disconnect", () => {
     if (users[socket.id]) {
