@@ -11,12 +11,13 @@ import { GetServerSideProps } from "next";
 import prisma from "@/lib/services/prisma";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { Message } from "@/utils/types";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Chat from "@/components/chat";
 import { Center } from "@/components/center";
+import { Search } from "lucide-react";
 
 export default function MatchPage({ genres }: { genres: string[] }) {
-  const { data, status } = useSession();
+  const { data } = useSession();
 
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
@@ -46,27 +47,38 @@ export default function MatchPage({ genres }: { genres: string[] }) {
     }
   };
 
-  console.log("current room", currentRoom);
-
   return (
-    <div>
-      {currentRoom ? (
-        <Center>
-          <Chat
-            onSendMessage={handleSendMessage}
-            messages={messages}
-            message={message}
-            setMessage={setMessage}
-          />
-        </Center>
-      ) : (
-        <button
-          onClick={handleRegister}
-          className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
+    <div className="flex items-center justify-center relative">
+      <div className="absolute top-5 right-5">
+        <p
+          onClick={() => signOut()}
+          className="font-medium text-gray-400 cursor-pointer border-border hover:text-black transition-all duration-300"
         >
-          Start matchmaking
-        </button>
-      )}
+          sign out
+        </p>
+      </div>
+
+      <div className="mt-16">
+        {currentRoom ? (
+          <Center>
+            <Chat
+              onSendMessage={handleSendMessage}
+              messages={messages}
+              message={message}
+              setMessage={setMessage}
+            />
+          </Center>
+        ) : (
+          <div className="flex items-center text-center align-center justify-center w-full mt-10">
+            <button
+              onClick={handleRegister}
+              className="w-[500px] flex justify-center items-center py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
+            >
+              <Search size={16} className="mr-2" /> Start matchmaking
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

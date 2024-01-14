@@ -16,8 +16,6 @@ export function Chat({
   message: string;
   setMessage: (message: string) => void;
 }) {
-  console.log("messages", messages)
-
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -116,6 +114,11 @@ const EnterMessage = ({
         className="rounded-lg w-full py-2 px-3 pr-8 bg-card border border-border text-lightGray outline-none"
         value={message}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            onSendMessage();
+          }
+        }}
       />
       <div
         className={clsx("absolute inset-y-0 right-0 flex items-center pr-3", {

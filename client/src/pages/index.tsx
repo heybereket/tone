@@ -1,10 +1,11 @@
-import { signIn, signOut, useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useEffect } from "react";
 import { SpotifyIcon } from "../components/icons/spotify";
+import { LogoIcon } from "../components/icons/logo";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
-import { Center } from "@/components/center";
+import { Text, Center } from "@chakra-ui/react";
 
 const STEP_ANIMATION = {
   initial: {
@@ -34,7 +35,7 @@ export default function Home() {
   if (status === "loading" || status === "authenticated") {
     return (
       <Center>
-        <Loader2 className="animate-spin text-white" />
+        <Loader2 className="animate-spin" />
       </Center>
     );
   }
@@ -44,29 +45,32 @@ export default function Home() {
       animate={STEP_ANIMATION.animate}
       initial={STEP_ANIMATION.initial}
       exit={STEP_ANIMATION.exit}
-      className="text-white relative"
+      className="text-black relative h-full w-full"
     >
-      {status === "unauthenticated" && (
-        <div className="absolute top-5 right-5">
-          <button
-            className="cursor-pointer bg-transparent font-semibold py-2 px-4 text-gray-400 border-border hover:text-black transition-all duration-300 rounded-lg"
-            onClick={() => signOut()}
-          >
-            sign out
-          </button>
-        </div>
-      )}
+      <Center w="100px" h="100px">
+        <LogoIcon />
+      </Center>
 
-      <div className="absolute bottom-0 left-0 right-0 top-60 grid place-items-center">
-        {status === "unauthenticated" && (
-          <button
-            className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
-            onClick={() => signIn("spotify")}
-          >
-            <SpotifyIcon className="mr-4" /> Sign in with Spotify
-          </button>
-        )}
-      </div>
+      <center>
+        <Text mt={175} fontSize={"5xl"}>
+          <Text as="b">Tone</Text> ⎯ <Text as="i">vibing</Text>, made simple.
+        </Text>
+        <Text fontSize={"md"}>
+          It&apos;s a match made in heaven. What are you waiting for?
+        </Text>
+
+        <div className="mt-10">
+          {status === "unauthenticated" && (
+            <button
+              className="group flex mr-4 cursor-pointer py-2 px-4 rounded-lg bg-card text-white border border-border flex items-center"
+              onClick={() => signIn("spotify")}
+            >
+              <SpotifyIcon className="mr-4" /> Sign in with Spotify{" "}
+              <ArrowRight size={16} className="ml-2 group-hover:block hidden" />
+            </button>
+          )}
+        </div>
+      </center>
     </motion.div>
   );
 }
