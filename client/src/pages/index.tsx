@@ -32,10 +32,9 @@ const STEP_ANIMATION = {
 export default function Home({ genres }: { genres: string[] }) {
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
+  const [messages, setMessages] = useState<string[]>([]);
 
   const { data, status } = useSession();
-
-  console.log(genres);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,7 +57,7 @@ export default function Home({ genres }: { genres: string[] }) {
     registerUser(genres, (roomId: string) => {
       setCurrentRoom(roomId);
       subscribeToRoom(roomId, (newMessage: string) => {
-        console.log("New Message in Room", roomId, ":", newMessage);
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
     });
   };
@@ -127,19 +126,21 @@ export default function Home({ genres }: { genres: string[] }) {
           >
             <SpotifyIcon className="mr-4" /> Sign in with Spotify
           </button>
-          
-        ) :
+        ) : (
           <button
             onClick={handleRegister}
             className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
           >
             Start matchmaking
           </button>
-        }
+        )}
 
         {currentRoom && (
           <div>
             <p>Connected to room: {currentRoom}</p>
+            {messages.map((msg, index) => (
+              <p key={index}>{msg}</p>
+            ))}
             <input
               type="text"
               placeholder="Type a message"
