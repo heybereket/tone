@@ -18,7 +18,6 @@ import { Search } from "lucide-react";
 import { SimpleGrid, Box, Text } from "@chakra-ui/react";
 import { fetchSpotifyAPI } from "@/lib/services/spotify";
 import { Account, Artist } from "@prisma/client";
-import { Spotify } from "react-spotify-embed";
 import SpotifyFramePlayer from "@/lib/services/spotify/player";
 import SpotifyPlayer from "@/components/spotify-player";
 
