@@ -96,8 +96,13 @@ async function tryMatchmaking() {
           users[potentialMatchId].socket?.emit("matched", roomID); // Use optional chaining to avoid errors
         }
 
-        io.to(roomID).emit("play_song", topSong.tracks[0].uri);
-
+        if (topSong && topSong.tracks && topSong.tracks.length > 0) {
+          io.to(roomID).emit("play_song", topSong.tracks[0].uri);
+        } else {
+          console.error(
+            "No tracks found in topSong or topSong.tracks is undefined"
+          );
+        }
         console.log(
           `Matched users in room ${roomID} with common genres: ${commonGenres.join(
             ", "
