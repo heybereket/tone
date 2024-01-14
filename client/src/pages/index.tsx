@@ -98,16 +98,10 @@ export default function Home({ genres }: { genres: string[] }) {
           <p>
             {status === "authenticated"
               ? "Ready to jump in?"
-              : "Meet people who share the same music taste with you, people you vibe with"}
+              : "Meet people who share your music taste, people you vibe with"}
           </p>
         </div>
 
-        <button
-          onClick={handleRegister}
-          className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
-        >
-          Start matchmaking
-        </button>
 
         {status === "unauthenticated" && (
           <button
@@ -117,6 +111,13 @@ export default function Home({ genres }: { genres: string[] }) {
             <SpotifyIcon className="mr-4" /> Sign in with Spotify
           </button>
         )}
+        
+        <button
+          onClick={handleRegister}
+          className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
+        >
+          Start matchmaking
+        </button>
 
         {currentRoom && (
           <div>
