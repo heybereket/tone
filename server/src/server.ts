@@ -28,11 +28,12 @@ io.on("connection", (socket) => {
     tryMatchmaking();
   });
 
-  socket.on("send_message", (messageData) => {
-    const { message, senderId, roomId } = messageData;
-    
-    io.to(roomId).emit("receive_message", { message, senderId });
-  });
+  socket.on(
+    "send_message",
+    (message: string, sender: string, roomId: string) => {
+      io.to(roomId).emit("receive_message", message, sender, roomId);
+    }
+  );
 
   socket.on("disconnect", () => {
     delete users[socket.id];

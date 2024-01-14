@@ -13,8 +13,8 @@ import prisma from "@/lib/services/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth].ts";
 import { GetServerSideProps } from "next";
-import Chat from "@/components/chat.tsx";
 import { Message } from "@/utils/types.ts";
+import Chat from "@/components/chat.tsx";
 
 const STEP_ANIMATION = {
   initial: {
@@ -52,20 +52,20 @@ export default function Home({ genres }: { genres: string[] }) {
     return () => {
       disconnectSocket();
     };
-  }, [currentRoom]);
+  }, []);
 
   const handleRegister = () => {
     registerUser(genres, (roomId: string) => {
       setCurrentRoom(roomId);
-      subscribeToRoom(roomId, (newMessage: Message) => {
-        setMessages((prev) => [...prev, newMessage]);
+      subscribeToRoom(roomId, (data: Message) => {
+        setMessages((prev) => [...prev, data]);
       });
     });
   };
 
   const handleSendMessage = () => {
     if (currentRoom && message) {
-      sendMessage(message, currentRoom, data?.user.id as string);
+      sendMessage(message, data?.user.id as string, currentRoom);
       setMessage("");
     }
   };
@@ -89,36 +89,18 @@ export default function Home({ genres }: { genres: string[] }) {
       )}
 
       <div className="absolute bottom-0 left-0 right-0 top-60 grid place-items-center">
-        <div className="mb-12 flex items-center flex-col">
+        <div className="mb-6 items-center justify-center">
           <h1 className="text-5xl font-bold text-white text-center mb-2">
             {status === "authenticated"
               ? `👋 Hi, ${data.user.name}!`
               : `Welcome to Tone 🎶`}
           </h1>
-          <p>
+          <p className="items-center justify-center">
             {status === "authenticated"
               ? "Ready to jump in?"
               : "Meet people who share your music taste, people you can vibe with"}
           </p>
         </div>
-
-        {/* {status === "unauthenticated" && (
-          <button
-            className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
-            onClick={() => signIn("spotify")}
-          >
-            <SpotifyIcon className="mr-4" /> Sign in with Spotify
-          </button>
-        )}
-
-        {status === "authenticated" && (    
-          <button
-            onClick={handleRegister}
-            className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
-          >
-            Start matchmaking
-          </button>
-        )} */}
 
         {status === "unauthenticated" ? (
           <button
@@ -128,22 +110,20 @@ export default function Home({ genres }: { genres: string[] }) {
             <SpotifyIcon className="mr-4" /> Sign in with Spotify
           </button>
         ) : (
-          !currentRoom && (
-            <button
-              onClick={handleRegister}
-              className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
-            >
-              Start matchmaking
-            </button>
-          )
+          <button
+            onClick={handleRegister}
+            className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
+          >
+            Start matchmaking
+          </button>
         )}
 
         {currentRoom && (
           <Chat
+            onSendMessage={handleSendMessage}
             messages={messages}
             message={message}
             setMessage={setMessage}
-            onSendMessage={handleSendMessage}
           />
         )}
       </div>

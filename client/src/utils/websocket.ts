@@ -26,13 +26,15 @@ export const registerUser = (
 
 export const subscribeToRoom = (
   roomId: string,
-  callback: (message: Message) => void
+  callback: (data: Message) => void
 ) => {
   if (!socket) return;
 
-  socket.off("receive_message").on("receive_message", callback);
+  socket.off("receive_message").on("receive_message", (message, sender) => {
+    callback({ message, sender });
+  });
 };
 
-export const sendMessage = (message: string, roomId: string, senderId: string ) => {
-  if (socket) socket.emit("send_message", message, roomId, senderId);
+export const sendMessage = (message: string, sender: string, roomId: string) => {
+  if (socket) socket.emit("send_message", message, sender, roomId);
 };

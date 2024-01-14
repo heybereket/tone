@@ -11,7 +11,7 @@ export function Chat({
   message,
   setMessage,
 }: {
-  messages: Message[];
+  messages: any[];
   onSendMessage: () => void;
   message: string;
   setMessage: (message: string) => void;
@@ -106,7 +106,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
         >
           Delivered at {dayjs(new Date().toISOString()).format("h:mm A")}
         </p>
-        {message.text}
+        {message.message}
       </div>
     </div>
   );
