@@ -92,6 +92,30 @@ export default function MatchPage({
     fetchData();
   }, []);
 
+  const Status = ({ name }: { name: string }) => {
+    if (["Roozbeh", "Bereket"].includes(name)) {
+      return (
+        <>
+          <Dot className="text-green-500" /> Online
+        </>
+      );
+    }
+
+    if (["David", "Owen"].includes(name)) {
+      return (
+        <>
+          <Dot className="text-yellow-500" /> Idle
+        </>
+      );
+    }
+
+    return (
+      <>
+        <Dot className="text-gray-300" /> Offline
+      </>
+    );
+  };
+
   return (
     <div>
       <div className="flex items-center justify-center relative">
@@ -159,17 +183,8 @@ export default function MatchPage({
                     className="flex flex-col items-center justify-center"
                   >
                     <div className="flex text-xs items-center mr-3">
-                      {i % 5 === 0 ? (
-                        <>
-                          {" "}
-                          <Dot className="text-green-500" /> Online
-                        </>
-                      ) : (
-                        <>
-                          <Dot className="text-yellow-500" /> Idle
-                        </>
-                      )}
-                    </div>{" "}
+                      <Status name={friendList[i]} />
+                    </div>
                     {friendList[i]}
                   </Text>
                 </Box>
