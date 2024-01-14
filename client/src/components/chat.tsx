@@ -78,10 +78,10 @@ const ChatMessage = ({ message }: { message: Message }) => {
   if (message.sender === data?.user.id) {
     return (
       <div className="flex items-center gap-2 justify-end pl-36">
-        <div className="font-mono py-2 px-4 bg-gray-500 rounded-tl-md rounded-bl-md rounded-tr-md text-left line-clamp-4">
+        <div className="font-mono py-2 px-4 bg-gray-300 rounded-tl-md rounded-bl-md rounded-tr-md text-left line-clamp-4">
           {message.message}
         </div>
-        <div className="rounded-full bg-gray-600 py-1 px-3 self-end">
+        <div className="rounded-full bg-gray-400 py-1 px-3 self-end">
           {data.user.name?.slice(0, 1).toUpperCase()}
         </div>
       </div>

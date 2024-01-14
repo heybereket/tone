@@ -15,14 +15,33 @@ import { signOut, useSession } from "next-auth/react";
 import Chat from "@/components/chat";
 import { Center } from "@/components/center";
 import { Search } from "lucide-react";
-import { SimpleGrid, Box } from '@chakra-ui/react'
+import { SimpleGrid, Box, Text } from "@chakra-ui/react";
+import { fetchSpotifyAPI } from "@/lib/services/spotify";
+import { Account, User } from "@prisma/client";
 
-export default function MatchPage({ genres }: { genres: string[] }) {
+export default function MatchPage({
+  user,
+  account,
+}: {
+  user: User;
+  account: Account;
+}) {
   const { data } = useSession();
 
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [friendList, setFriendList] = useState<string[]>([
+    "David",
+    "Owen",
+    "Akshay",
+    "Tae",
+    "Varun",
+    "Ankur",
+    "Bereket",
+    "Roozbeh",
+  ]);
+//   const [song, setSong] = useState(null);
 
   useEffect(() => {
     connectSocket();
@@ -33,7 +52,7 @@ export default function MatchPage({ genres }: { genres: string[] }) {
   }, []);
 
   const handleRegister = () => {
-    registerUser(genres, (roomId: string) => {
+    registerUser(user.topGenres, (roomId: string) => {
       setCurrentRoom(roomId);
       subscribeToRoom(roomId, (data: Message) => {
         setMessages((prev) => [...prev, data]);
@@ -47,6 +66,25 @@ export default function MatchPage({ genres }: { genres: string[] }) {
       setMessage("");
     }
   };
+
+//   useEffect(() => {
+//     if (currentRoom) {
+//       const fetchTopSong = async () => {
+//         const topSong = await fetchSpotifyAPI({
+//           token: account.access_token as string,
+//           endpoint: `v1/recommendations/?limit=1&seed_genres=${user.topGenres.join(
+//             ","
+//           )}`,
+//         });
+
+//         setSong(topSong);
+//       };
+
+//       fetchTopSong();
+//     }
+//   }, [account.access_token, currentRoom, user.topGenres]);
+
+//   console.log(song);
 
   return (
     <div>
@@ -82,13 +120,32 @@ export default function MatchPage({ genres }: { genres: string[] }) {
           )}
         </div>
       </div>
+      <Text fontWeight={'semibold'} align={'center'}>Your friends.</Text>
       <center>
-        <SimpleGrid columns={4} spacingX='40px' spacingY='0px' width={500} height={500} padding={10} mt={10}>
-          <Box bg='gray' height='60px'></Box>
-          <Box bg='tomato' height='60px'></Box>
-          <Box bg='tomato' height='60px'></Box>
-          <Box bg='tomato' height='60px'></Box>
-          <Box bg='tomato' height='60px'></Box>
+        <SimpleGrid
+          alignItems={"center"}
+          columns={3}
+          spacingX="60px"
+          width={750}
+          height={500}
+          padding={10}
+        >
+          {Object.keys(friendList).map((keyName, i) => (
+            <Box
+              key={i}
+              borderColor="gray"
+              height="60px"
+              width="150px"
+              borderRadius="lg"
+              maxW="sm"
+              borderWidth="1px"
+              overflow="hidden"
+            >
+              <Text mt={4} fontWeight={"semibold"} color="black">
+                {friendList[i]}
+              </Text>
+            </Box>
+          ))}
         </SimpleGrid>
       </center>
     </div>
@@ -110,9 +167,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   });
 
+  const account = await prisma.account.findFirst({
+    where: {
+      userId: session.user.id as string,
+    },
+  });
+
   return {
     props: {
-      genres: user?.topGenres ?? [],
+      user,
+      account,
     },
   };
 };
