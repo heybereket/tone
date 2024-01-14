@@ -5,6 +5,7 @@ import {
   registerUser,
   subscribeToRoom,
   sendMessage,
+  songPlayed,
 } from "@/utils/websocket.ts";
 import { getServerSession } from "next-auth";
 import { GetServerSideProps } from "next";
@@ -56,25 +57,27 @@ export default function MatchPage({
   }, []);
 
   const handleRegister = () => {
-    registerUser(genres, (roomId: string) => {
-      setCurrentRoom(roomId);
-      subscribeToRoom(roomId, async (data: Message) => {
-        await spotify?.playSong(data.song);
-        setMessages((prev) => [...prev, data]);
-      });
-    });
+    registerUser(
+      genres,
+      artists.slice(0, 2).map((artist) => artist.id),
+      account.access_token as string,
+      (roomId: string) => {
+        setCurrentRoom(roomId);
+
+        subscribeToRoom(roomId, async (data: Message) => {
+          setMessages((prev) => [...prev, data]);
+        });
+
+        songPlayed(currentRoom as string, async (song: string) => {
+          await spotify?.playSong(song);
+        });
+      }
+    );
   };
 
   const handleSendMessage = () => {
     if (currentRoom && message) {
-      sendMessage(
-        message,
-        data?.user.id as string,
-        currentRoom,
-        artists.slice(0, 2).map((artist) => artist.id),
-        genres,
-        account.access_token as string
-      );
+      sendMessage(message, data?.user.id as string, currentRoom);
       setMessage("");
     }
   };
@@ -101,7 +104,7 @@ export default function MatchPage({
           </p>
         </div>
 
-        <div className="absolute bottom-20 right-3">
+        <div className="absolute bottom-20 right-5">
           <SpotifyPlayer />
         </div>
 

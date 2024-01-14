@@ -18,39 +18,19 @@ let waitingQueue: string[] = [];
 io.on("connection", (socket) => {
   console.log("a user connected:", socket.id);
 
-  socket.on("register", (genres: string[]) => {
-    users[socket.id] = { socket, genres };
-    waitingQueue.push(socket.id);
-    tryMatchmaking();
-  });
+  socket.on(
+    "register",
+    (genres: string[], artists: string[], accessToken: string) => {
+      users[socket.id] = { socket, genres, artists, accessToken };
+      waitingQueue.push(socket.id);
+      tryMatchmaking();
+    }
+  );
 
   socket.on(
     "send_message",
-    async (
-      message: string,
-      sender: string,
-      roomId: string,
-      artists: string[],
-      genres: string[],
-      accessToken: string
-    ) => {
-      const topSong: any = await fetch(
-        `https://api.spotify.com/v1/recommendations/?limit=1&seed_genres=${genres.join(
-          ","
-        )}&seed_artists=${artists.join(",")}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      ).then((res) => res.json());
-
-      io.to(roomId).emit(
-        "receive_message",
-        message,
-        sender,
-        topSong.tracks[0].uri
-      );
+    async (message: string, sender: string, roomId: string) => {
+      io.to(roomId).emit("receive_message", message, sender);
     }
   );
 
@@ -64,7 +44,7 @@ io.on("connection", (socket) => {
 });
 
 function tryMatchmaking() {
-  waitingQueue.forEach((userId, index) => {
+  waitingQueue.forEach(async (userId, index) => {
     const currentUserGenres = users[userId].genres;
 
     for (let i = index + 1; i < waitingQueue.length; i++) {
@@ -77,12 +57,26 @@ function tryMatchmaking() {
 
       if (commonGenres.length > 0) {
         const roomID = pika.gen("ch");
+        const user = users[userId];
+
+        const topSong: any = await fetch(
+          `https://api.spotify.com/v1/recommendations/?limit=1&seed_genres=${user.genres.join(
+            ","
+          )}&seed_artists=${user.artists.join(",")}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.accessToken}`,
+            },
+          }
+        ).then((res) => res.json());
 
         users[userId].socket.join(roomID);
         users[potentialMatchId].socket.join(roomID);
 
         users[userId].socket.emit("matched", roomID);
         users[potentialMatchId].socket.emit("matched", roomID);
+
+        io.to(roomID).emit("play_song", topSong.tracks[0].uri);
 
         console.log(
           `Matched users in room ${roomID} with common genres: ${commonGenres.join(

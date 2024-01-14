@@ -18,11 +18,13 @@ export const disconnectSocket = async () => {
 
 export const registerUser = (
   genres: string[],
+  artists: string[],
+  accessToken: string,
   callback: (roomId: string) => void
 ) => {
   if (!socket) return;
 
-  socket.emit("register", genres);
+  socket.emit("register", genres, artists, accessToken);
 
   socket.on("matched", callback);
 };
@@ -33,20 +35,26 @@ export const subscribeToRoom = (
 ) => {
   if (!socket) return;
 
-  socket
-    .off("receive_message")
-    .on("receive_message", (message, sender, song) => {
-      callback({ message, sender, song });
-    });
+  socket.off("receive_message").on("receive_message", (message, sender) => {
+    callback({ message, sender });
+  });
+};
+
+export const songPlayed = (
+  roomId: string,
+  callback: (song: string) => void
+) => {
+  if (!socket) return;
+
+  socket.off("play_song").on("play_song", (song) => {
+    callback(song);
+  });
 };
 
 export const sendMessage = (
   message: string,
   sender: string,
-  roomId: string,
-  artists: string[],
-  genres: string[],
-  accessToken: string
+  roomId: string
 ) => {
-  if (socket) socket.emit("send_message", message, sender, roomId, artists, genres, accessToken);
+  if (socket) socket.emit("send_message", message, sender, roomId);
 };
