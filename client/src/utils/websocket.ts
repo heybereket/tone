@@ -1,4 +1,5 @@
 import io from "socket.io-client";
+import { Message } from "./types";
 
 let socket: ReturnType<typeof io>;
 
@@ -25,13 +26,13 @@ export const registerUser = (
 
 export const subscribeToRoom = (
   roomId: string,
-  callback: (message: string) => void
+  callback: (message: Message) => void
 ) => {
   if (!socket) return;
 
   socket.off("receive_message").on("receive_message", callback);
 };
 
-export const sendMessage = (message: string, roomId: string) => {
-  if (socket) socket.emit("send_message", message, roomId);
+export const sendMessage = (message: string, roomId: string, senderId: string ) => {
+  if (socket) socket.emit("send_message", message, roomId, senderId);
 };

@@ -1,114 +1,145 @@
-import { useChannelMessage, useReadChannelState } from "@onehop/react";
-import { startTransition, useEffect, useRef, useState } from "react";
-import { HOP_CHANNEL_NAME } from "@/lib/constants";
-import { Message, PickWhereValuesAre } from "@/utils/types";
-import { getErrorMessage } from "@/utils/errors";
+import { SendHorizontal } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import clsx from "clsx";
+import { Message } from "@/utils/types";
+import { useSession } from "next-auth/react";
+import dayjs from "dayjs";
 
-export default function Chat() {
-  const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<Array<Message>>([]);
-
-  const [message, setMessage] = useState<Omit<Message, "id" | "isAdmin">>({
-    author: "",
-    content: "",
-  });
-
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  useChannelMessage<Message>(HOP_CHANNEL_NAME, "MESSAGE_CREATE", (message) => {
-    setMessages((messages) => [message, ...messages]);
-  });
-
-  const { state } = useReadChannelState<{ messages: Message[] }>(
-    HOP_CHANNEL_NAME
-  );
+export function Chat({
+  messages,
+  onSendMessage,
+  message,
+  setMessage,
+}: {
+  messages: Message[];
+  onSendMessage: () => void;
+  message: string;
+  setMessage: (message: string) => void;
+}) {
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (messages.length === 0 && state && state.messages.length > 0) {
-      setMessages(state.messages);
+    if (chatContainerRef.current) {
+      (chatContainerRef.current as HTMLDivElement).scrollTop = (
+        chatContainerRef.current as HTMLDivElement
+      ).scrollHeight;
     }
-  }, [state, messages]);
-
-  useEffect(() => {
-    if (!loading) {
-      inputRef.current?.focus();
-    }
-  }, [loading]);
-
-  const set = (key: keyof PickWhereValuesAre<Omit<Message, "id">, string>) => {
-    return (event: React.ChangeEvent<HTMLInputElement>) => {
-      setMessage((m) => ({ ...m, [key]: event.target.value }));
-    };
-  };
+  }, [messages]);
 
   return (
-    <div>
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
+    <div
+      className="w-[600px] space-y-4 mb-10 overflow-y-auto"
+      ref={chatContainerRef}
+    >
+      {messages.map((message, index) => (
+        <ChatMessage key={index} message={message} />
+      ))}
 
-          if (message.content.trim() === "") {
-            return;
-          }
-
-          setLoading(true);
-
-          try {
-            const request = new Request("/api/realtime/message", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(message),
-            });
-
-            const response = await fetch(request);
-            const body = (await response.json()) as
-              | { success: true }
-              | { success: false; message: string };
-
-            if (!body.success) {
-              throw new Error(body.message);
-            }
-
-            setMessage((old) => ({ ...old, content: "" }));
-          } catch (e: unknown) {
-            console.error(e);
-            alert(getErrorMessage(e));
-          } finally {
-            startTransition(() => {
-              setLoading(false);
-            });
-          }
-        }}
-      >
-        <input
-          disabled={loading}
-          type="text"
-          placeholder="Author"
-          value={message.author}
-          onChange={set("author")}
-        />
-
-        <input
-          ref={inputRef}
-          disabled={loading}
-          type="text"
-          placeholder="Write a message..."
-          value={message.content}
-          onChange={set("content")}
-        />
-
-        <button disabled={loading} type="submit">
-          Send
-        </button>
-      </form>
-
-      <ul>
-        {messages.map((message) => (
-          <li key={message.id}>
-            {message.author}:<span>{message.content}</span>
-          </li>
-        ))}
-      </ul>
+      <EnterMessage
+        message={message}
+        onChange={setMessage}
+        onSendMessage={onSendMessage}
+      />
     </div>
   );
 }
+
+// other user
+// const Chat1 = () => (
+//   <div className="flex items-center gap-2 pr-36">
+//     <div className="rounded-full bg-gray-600 py-1 px-3 self-end">B</div>
+//     <div className="font-mono py-2 px-4 bg-blue-500 rounded-tr-md rounded-tl-md rounded-br-md text-left tracking-light line-clamp-4">
+//       Hey there!
+//     </div>
+//   </div>
+// );
+
+// user
+// const Chat2 = () => {
+//   return (
+//     <div className="">
+//       <div className="flex items-center gap-2 justify-end pl-36">
+//         <div className="font-mono py-2 px-4 bg-gray-500 rounded-tl-md rounded-bl-md rounded-tr-md text-left line-clamp-4">
+//           Hey!
+//         </div>
+//         <div className="rounded-full bg-gray-600 py-1 px-3 self-end">R</div>
+//       </div>
+
+//       <p className="flex justify-end text-lightGray text-xs mt-2">
+//         Delivered at {dayjs(new Date().toISOString()).format("h:mm A")}
+//       </p>
+//     </div>
+//   );
+// };
+
+const ChatMessage = ({ message }: { message: Message }) => {
+  const { data } = useSession();
+
+  return (
+    <div
+      className={clsx(
+        "flex items-center gap-2",
+        message.sender === data?.user.id ? "pr-36" : "justify-end pl-36"
+      )}
+    >
+      <div
+        className={clsx(
+          "rounded-full bg-gray-600 py-1 px-3 self-end",
+          message.sender === data?.user.id && "ml-auto"
+        )}
+      >
+        {message.sender}
+      </div>
+      <div
+        className={clsx(
+          "font-mono py-2 px-4 rounded-md text-left line-clamp-4",
+          message.sender === "B"
+            ? "bg-blue-500 rounded-tr-md rounded-tl-md rounded-br-md"
+            : "bg-gray-500 rounded-tl-md rounded-bl-md rounded-tr-md"
+        )}
+      >
+        <p
+          className={clsx(
+            "text-lightGray text-xs mt-2",
+            message.sender === "B" ? "flex justify-start" : "flex justify-end"
+          )}
+        >
+          Delivered at {dayjs(new Date().toISOString()).format("h:mm A")}
+        </p>
+        {message.text}
+      </div>
+    </div>
+  );
+};
+
+const EnterMessage = ({
+  message,
+  onSendMessage,
+  onChange,
+}: {
+  message: string;
+  onSendMessage: () => void;
+  onChange: (message: string) => void;
+}) => {
+  return (
+    <div className="relative">
+      <input
+        placeholder="What's on your mind?"
+        className="rounded-lg w-full py-2 px-3 pr-8 bg-card border border-border text-lightGray outline-none"
+        value={message}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <div
+        className={clsx("absolute inset-y-0 right-0 flex items-center pr-3", {
+          "text-lightGray hover:cursor-not-allowed": message.trim() === "",
+          "text-white hover:cursor-pointer": message.trim() !== "",
+        })}
+        onClick={onSendMessage}
+      >
+        <SendHorizontal size={16} />
+      </div>
+    </div>
+  );
+};
+
+export default Chat;

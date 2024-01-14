@@ -1,7 +1,6 @@
 export interface Message {
-    id: string;
-	content: string;
-	author: string;
+   sender: string;
+   text: string;
 }
 
 export type PickWhereValuesAre<T, V> = {

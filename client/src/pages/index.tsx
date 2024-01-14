@@ -13,6 +13,8 @@ import prisma from "@/lib/services/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth].ts";
 import { GetServerSideProps } from "next";
+import Chat from "@/components/chat.tsx";
+import { Message } from "@/utils/types.ts";
 
 const STEP_ANIMATION = {
   initial: {
@@ -32,7 +34,7 @@ const STEP_ANIMATION = {
 export default function Home({ genres }: { genres: string[] }) {
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const { data, status } = useSession();
 
@@ -50,21 +52,20 @@ export default function Home({ genres }: { genres: string[] }) {
     return () => {
       disconnectSocket();
     };
-  }, []);
+  }, [currentRoom]);
 
   const handleRegister = () => {
     registerUser(genres, (roomId: string) => {
       setCurrentRoom(roomId);
-      subscribeToRoom(roomId, (newMessage: string) => {
-        console.log(newMessage)
-        setMessages(prev => [...prev, newMessage]);
+      subscribeToRoom(roomId, (newMessage: Message) => {
+        setMessages((prev) => [...prev, newMessage]);
       });
     });
   };
 
   const handleSendMessage = () => {
     if (currentRoom && message) {
-      sendMessage(message, currentRoom);
+      sendMessage(message, currentRoom, data?.user.id as string);
       setMessage("");
     }
   };
@@ -88,13 +89,13 @@ export default function Home({ genres }: { genres: string[] }) {
       )}
 
       <div className="absolute bottom-0 left-0 right-0 top-60 grid place-items-center">
-        <div className="mb-6 items-center justify-center">
+        <div className="mb-12 flex items-center flex-col">
           <h1 className="text-5xl font-bold text-white text-center mb-2">
             {status === "authenticated"
               ? `👋 Hi, ${data.user.name}!`
               : `Welcome to Tone 🎶`}
           </h1>
-          <p className="items-center justify-center">
+          <p>
             {status === "authenticated"
               ? "Ready to jump in?"
               : "Meet people who share your music taste, people you can vibe with"}
@@ -127,28 +128,23 @@ export default function Home({ genres }: { genres: string[] }) {
             <SpotifyIcon className="mr-4" /> Sign in with Spotify
           </button>
         ) : (
-          <button
-            onClick={handleRegister}
-            className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
-          >
-            Start matchmaking
-          </button>
+          !currentRoom && (
+            <button
+              onClick={handleRegister}
+              className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
+            >
+              Start matchmaking
+            </button>
+          )
         )}
 
         {currentRoom && (
-          <div>
-            <p>Connected to room: {currentRoom}</p>
-            {messages.map((msg, index) => (
-              <p key={index}>{msg}</p>
-            ))}
-            <input
-              type="text"
-              placeholder="Type a message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            <button onClick={handleSendMessage}>Send Message</button>
-          </div>
+          <Chat
+            messages={messages}
+            message={message}
+            setMessage={setMessage}
+            onSendMessage={handleSendMessage}
+          />
         )}
       </div>
     </motion.div>
