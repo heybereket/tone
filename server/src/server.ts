@@ -1,9 +1,7 @@
+// server.ts
 import http from "http";
 import { Server, Socket } from "socket.io";
 import { pika } from "./utils/pika";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 interface User {
   socket: Socket;
@@ -13,7 +11,7 @@ interface User {
 const server = http.createServer();
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "*", // Adjust in production
     methods: ["GET", "POST"],
   },
 });
@@ -28,6 +26,10 @@ io.on("connection", (socket) => {
     users[socket.id] = { socket, genres };
     waitingQueue.push(socket.id);
     tryMatchmaking();
+  });
+
+  socket.on("send_message", (message: string, roomId: string) => {
+    io.to(roomId).emit("receive_message", message);
   });
 
   socket.on("disconnect", () => {
@@ -50,7 +52,7 @@ function tryMatchmaking() {
       );
 
       if (commonGenres.length > 0) {
-        const roomID = pika.gen("channel");
+        const roomID = pika.gen("ch");
 
         users[userId].socket.join(roomID);
         users[potentialMatchId].socket.join(roomID);
@@ -64,7 +66,6 @@ function tryMatchmaking() {
           )}`
         );
 
-        // Remove matched users from queue
         waitingQueue = waitingQueue.filter(
           (id) => id !== userId && id !== potentialMatchId
         );
@@ -74,4 +75,6 @@ function tryMatchmaking() {
   });
 }
 
-server.listen(8080);
+server.listen(8080, () => {
+  console.log("Server listening on port 8080");
+});

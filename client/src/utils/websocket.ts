@@ -20,9 +20,7 @@ export const registerUser = (
 
   socket.emit("register", genres);
 
-  socket.on("matched", (roomId: string) => {
-    callback(roomId);
-  });
+  socket.on("matched", callback);
 };
 
 export const subscribeToRoom = (
@@ -31,9 +29,7 @@ export const subscribeToRoom = (
 ) => {
   if (!socket) return;
 
-  socket.on("receive_message", (message: string) => {
-    callback(message);
-  });
+  socket.off("receive_message").on("receive_message", callback);
 };
 
 export const sendMessage = (message: string, roomId: string) => {

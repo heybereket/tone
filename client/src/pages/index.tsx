@@ -47,7 +47,6 @@ export default function Home({ genres }: { genres: string[] }) {
 
   useEffect(() => {
     connectSocket();
-
     return () => {
       disconnectSocket();
     };
@@ -57,7 +56,7 @@ export default function Home({ genres }: { genres: string[] }) {
     registerUser(genres, (roomId: string) => {
       setCurrentRoom(roomId);
       subscribeToRoom(roomId, (newMessage: string) => {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        setMessages((prev) => [...prev, newMessage]);
       });
     });
   };
