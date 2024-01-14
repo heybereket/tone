@@ -3,14 +3,17 @@ import { Message } from "./types";
 
 let socket: ReturnType<typeof io>;
 
-export const connectSocket = () => {
+export const connectSocket = async () => {
   socket = io(process.env.NEXT_PUBLIC_BACKEND_URL as string);
   console.log("Connecting socket...");
 };
 
-export const disconnectSocket = () => {
+export const disconnectSocket = async () => {
   console.log("Disconnecting socket...");
-  if (socket) socket.disconnect();
+
+  if (socket) {
+    socket.disconnect();
+  }
 };
 
 export const registerUser = (
@@ -35,6 +38,10 @@ export const subscribeToRoom = (
   });
 };
 
-export const sendMessage = (message: string, sender: string, roomId: string) => {
+export const sendMessage = (
+  message: string,
+  sender: string,
+  roomId: string
+) => {
   if (socket) socket.emit("send_message", message, sender, roomId);
 };
