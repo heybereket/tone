@@ -15,6 +15,7 @@ import { signOut, useSession } from "next-auth/react";
 import Chat from "@/components/chat";
 import { Center } from "@/components/center";
 import { Search } from "lucide-react";
+import { SimpleGrid } from '@chakra-ui/react'
 
 export default function MatchPage({ genres }: { genres: string[] }) {
   const { data } = useSession();

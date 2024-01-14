@@ -36,9 +36,11 @@ io.on("connection", (socket) => {
   );
 
   socket.on("disconnect", () => {
-    delete users[socket.id];
-    waitingQueue = waitingQueue.filter((id) => id !== socket.id);
-    console.log("user disconnected", socket.id);
+    if (users[socket.id]) {
+      delete users[socket.id];
+      waitingQueue = waitingQueue.filter((id) => id !== socket.id);
+      console.log("user disconnected", socket.id);
+    }
   });
 });
 
