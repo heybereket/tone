@@ -80,7 +80,7 @@ export default function Home({ genres }: { genres: string[] }) {
       {status === "authenticated" && (
         <div className="absolute top-5 right-5">
           <button
-            className="cursor-pointer bg-transparent hover:bg-gray-800 text-black-700 font-semibold py-2 px-4 border border-grey-600 hover:border-transparent rounded-lg"
+            className="cursor-pointer bg-transparent text-black-700 font-semibold py-2 px-4 border border-grey-600 hover:backdrop-blur-sm rounded-lg"
             onClick={() => signOut()}
           >
             sign out

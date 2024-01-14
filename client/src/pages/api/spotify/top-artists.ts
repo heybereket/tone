@@ -12,7 +12,7 @@ export default async function handler(
 
   const user = await prisma.user.findFirst({
     where: {
-      email: session?.user.email,
+      id: session?.user.id,
     },
   });
 
