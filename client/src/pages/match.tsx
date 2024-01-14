@@ -19,6 +19,8 @@ import { SimpleGrid, Box, Text } from "@chakra-ui/react";
 import { fetchSpotifyAPI } from "@/lib/services/spotify";
 import { Account, Artist } from "@prisma/client";
 import { Spotify } from "react-spotify-embed";
+import SpotifyFramePlayer from "@/lib/services/spotify/player";
+import SpotifyPlayer from "@/components/spotify-player";
 
 export default function MatchPage({
   genres,
@@ -44,7 +46,7 @@ export default function MatchPage({
     "Bereket",
     "Roozbeh",
   ]);
-  const [song, setSong] = useState(null);
+  const [spotify, setSpotify] = useState<SpotifyFramePlayer | null>(null);
 
   useEffect(() => {
     connectSocket();
@@ -83,13 +85,16 @@ export default function MatchPage({
             .join(",")}`,
         });
 
-        setSong(topSong.tracks[0].external_urls.spotify);
+        const spotify = new SpotifyFramePlayer();
+        await spotify.loadLibrary();
+        setSpotify(spotify);
+
+        await spotify.playSong(topSong.tracks[0].uri);
       };
 
       fetchTopSong();
     }
   }, [account.access_token, artists, currentRoom, genres]);
-
 
   return (
     <div>
@@ -104,7 +109,7 @@ export default function MatchPage({
         </div>
 
         <div className="absolute bottom-20 right-3">
-          {song && <Spotify wide link={song} />}
+          <SpotifyPlayer />
         </div>
 
         <div className="mt-16">
@@ -150,7 +155,7 @@ export default function MatchPage({
                 maxW="sm"
                 borderWidth="1px"
                 overflow="hidden"
-                bgGradient='linear(to-r, green.200, pink.500)'
+                bgGradient="linear(to-r, blue.200, blue.700)"
               >
                 <Text mt={4} fontWeight={"semibold"} color="black">
                   {friendList[i]}
