@@ -175,16 +175,12 @@ export default function MatchPage({
                   maxW="sm"
                   borderWidth="1px"
                   overflow="hidden"
+                  className="flex flex-col items-center justify-center"
                 >
-                  <Text
-                    mt={4}
-                    fontWeight={"semibold"}
-                    color="black"
-                    className="flex flex-col items-center justify-center"
-                  >
-                    <div className="flex text-xs items-center mr-3">
-                      <Status name={friendList[i]} />
-                    </div>
+                  <div className="flex text-xs items-center mr-3">
+                    <Status name={friendList[i]} />
+                  </div>
+                  <Text mt={4} fontWeight={"semibold"} color="black">
                     {friendList[i]}
                   </Text>
                 </Box>
