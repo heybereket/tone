@@ -28,7 +28,7 @@ to explain your suggested change.
 
 [MIT](https://choosealicense.com/licenses/mit/)
 
-## Acknowledgements
+## Made by
 
 * Bereket Semagn
 * Roozbeh Ali
