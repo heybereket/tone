@@ -13,9 +13,10 @@ interface User {
 const server = http.createServer();
 const io = new Server(server, {
   cors: {
-    origin: "https://tone-music.vercel.app",
+    origin: "*",
     methods: ["GET", "POST"],
   },
+  transports: ["websocket"],
 });
 
 let users: Record<string, User> = {};
