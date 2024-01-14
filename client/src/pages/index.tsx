@@ -80,7 +80,7 @@ export default function Home({ genres }: { genres: string[] }) {
       {status === "authenticated" && (
         <div className="absolute top-5 right-5">
           <button
-            className="cursor-pointer bg-gray-100 hover:bg-gray-300 text-black-700 font-semibold py-2 px-4 border border-grey-600 hover:border-transparent rounded-lg"
+            className="cursor-pointer bg-transparent hover:bg-gray-800 text-black-700 font-semibold py-2 px-4 border border-grey-600 hover:border-transparent rounded-lg"
             onClick={() => signOut()}
           >
             sign out
@@ -95,10 +95,10 @@ export default function Home({ genres }: { genres: string[] }) {
               ? `👋 Hi, ${data.user.name}!`
               : `Welcome to Tone 🎶`}
           </h1>
-          <p>
+          <p className="items-center justify-center">
             {status === "authenticated"
               ? "Ready to jump in?"
-              : "Meet people who share your music taste, people you vibe with"}
+              : "Meet people who share your music taste, people you can vibe with"}
           </p>
         </div>
 
