@@ -1,6 +1,7 @@
 export interface Message {
   message: string;
   sender: string;
+  song: string;
 }
 
 export type PickWhereValuesAre<T, V> = {

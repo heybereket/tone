@@ -28,7 +28,7 @@ export function Chat({
 
   return (
     <div
-      className="w-[600px] space-y-4 overflow-y-auto"
+      className="w-[600px] h-[800px] space-y-4 overflow-y-auto"
       ref={chatContainerRef}
     >
       {messages.map((message, index) => (
@@ -90,7 +90,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
     return (
       <div className="flex items-center gap-2 pr-36">
         <div className="rounded-full bg-gray-600 py-1 px-3 self-end">??</div>
-        <div className="font-mono py-2 px-4 bg-blue-500 rounded-tr-md rounded-tl-md rounded-br-md text-left tracking-light line-clamp-4">
+        <div className="font-mono py-2 px-4 bg-blue-500 rounded-tr-md rounded-tl-md rounded-br-md text-left tracking-light break-words">
           {message.message}
         </div>
       </div>

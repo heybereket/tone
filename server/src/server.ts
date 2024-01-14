@@ -26,8 +26,31 @@ io.on("connection", (socket) => {
 
   socket.on(
     "send_message",
-    (message: string, sender: string, roomId: string) => {
-      io.to(roomId).emit("receive_message", message, sender);
+    async (
+      message: string,
+      sender: string,
+      roomId: string,
+      artists: string[],
+      genres: string[],
+      accessToken: string
+    ) => {
+      const topSong: any = await fetch(
+        `https://api.spotify.com/v1/recommendations/?limit=1&seed_genres=${genres.join(
+          ","
+        )}&seed_artists=${artists.join(",")}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      ).then((res) => res.json());
+
+      io.to(roomId).emit(
+        "receive_message",
+        message,
+        sender,
+        topSong.tracks[0].uri
+      );
     }
   );
 

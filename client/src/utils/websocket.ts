@@ -33,15 +33,20 @@ export const subscribeToRoom = (
 ) => {
   if (!socket) return;
 
-  socket.off("receive_message").on("receive_message", (message, sender) => {
-    callback({ message, sender });
-  });
+  socket
+    .off("receive_message")
+    .on("receive_message", (message, sender, song) => {
+      callback({ message, sender, song });
+    });
 };
 
 export const sendMessage = (
   message: string,
   sender: string,
-  roomId: string
+  roomId: string,
+  artists: string[],
+  genres: string[],
+  accessToken: string
 ) => {
-  if (socket) socket.emit("send_message", message, sender, roomId);
+  if (socket) socket.emit("send_message", message, sender, roomId, artists, genres, accessToken);
 };

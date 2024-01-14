@@ -58,7 +58,8 @@ export default function MatchPage({
   const handleRegister = () => {
     registerUser(genres, (roomId: string) => {
       setCurrentRoom(roomId);
-      subscribeToRoom(roomId, (data: Message) => {
+      subscribeToRoom(roomId, async (data: Message) => {
+        await spotify?.playSong(data.song);
         setMessages((prev) => [...prev, data]);
       });
     });
@@ -66,30 +67,17 @@ export default function MatchPage({
 
   const handleSendMessage = () => {
     if (currentRoom && message) {
-      sendMessage(message, data?.user.id as string, currentRoom);
+      sendMessage(
+        message,
+        data?.user.id as string,
+        currentRoom,
+        artists.slice(0, 2).map((artist) => artist.id),
+        genres,
+        account.access_token as string
+      );
       setMessage("");
     }
   };
-
-  useEffect(() => {
-    if (currentRoom) {
-      const fetchTopSong = async () => {
-        const topSong = await fetchSpotifyAPI({
-          token: account.access_token as string,
-          endpoint: `v1/recommendations/?limit=1&seed_genres=${genres.join(
-            ","
-          )}&seed_artists=${artists
-            .slice(0, 2)
-            .map((artist) => artist.id)
-            .join(",")}`,
-        });
-
-        await spotify?.playSong(topSong.tracks[0].uri);
-      };
-
-      fetchTopSong();
-    }
-  }, [account.access_token, artists, currentRoom, genres, spotify]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -159,7 +147,6 @@ export default function MatchPage({
                 maxW="sm"
                 borderWidth="1px"
                 overflow="hidden"
-                bgGradient="linear(to-r, blue.200, blue.700)"
               >
                 <Text mt={4} fontWeight={"semibold"} color="black">
                   {friendList[i]}
