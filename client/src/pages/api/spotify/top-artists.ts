@@ -1,9 +1,8 @@
-import { fetchSpotifyAPI } from "@/lib/spotify";
+import { fetchSpotifyAPI } from "@/lib/services/spotify";
 import { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "@/utils/get-user-session";
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "./auth/[...nextauth]";
+import { authOptions } from "../auth/[...nextauth]";
+import prisma from "@/lib/services/prisma";
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,6 +15,10 @@ export default async function handler(
       email: session?.user.email,
     },
   });
+
+  if (user?.hasFetchedArtists) {
+    return res.status(200).send("Already fetched artists");
+  }
 
   const account = await prisma.account.findFirst({
     where: {
@@ -39,27 +42,25 @@ export default async function handler(
     };
   });
 
-  if (!user?.hasFetchedArtists) {
-    await prisma.user.update({
-      where: {
-        id: user?.id,
-      },
-      data: {
-        hasFetchedArtists: true,
-      },
-    });
+  await prisma.user.update({
+    where: {
+      id: user?.id,
+    },
+    data: {
+      hasFetchedArtists: true,
+    },
+  });
 
-    await prisma.artist.createMany({
-      data: parsedTopArtists.map((artist: any) => ({
-        id: artist.id,
-        userId: user?.id,
-        name: artist.name,
-        image: artist.image,
-        genres: artist.genres,
-      })),
-      skipDuplicates: true,
-    });
-  }
+  await prisma.artist.createMany({
+    data: parsedTopArtists.map((artist: any) => ({
+      id: artist.id,
+      userId: user?.id,
+      name: artist.name,
+      image: artist.image,
+      genres: artist.genres,
+    })),
+    skipDuplicates: true,
+  });
 
   return res.status(200).json(parsedTopArtists);
 }

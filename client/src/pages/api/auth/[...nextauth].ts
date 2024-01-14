@@ -1,9 +1,7 @@
+import prisma from "@/lib/services/prisma";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
 import NextAuth, { AuthOptions } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
-
-export const prisma = new PrismaClient();
 
 export const authOptions: AuthOptions = {
   debug: true,
@@ -25,6 +23,9 @@ export const authOptions: AuthOptions = {
       }
 
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      return baseUrl;
     },
   },
   adapter: PrismaAdapter(prisma),

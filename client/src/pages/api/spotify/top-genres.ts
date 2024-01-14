@@ -1,8 +1,7 @@
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/utils/get-user-session";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
-import { authOptions } from "./auth/[...nextauth]";
+import { authOptions } from "../auth/[...nextauth]";
+import prisma from "@/lib/services/prisma";
 
 export default async function handler(
   req: NextApiRequest,
@@ -15,6 +14,10 @@ export default async function handler(
       email: session?.user.email,
     },
   });
+
+  if (user && user.topGenres && user.topGenres.length > 0) {
+    return res.status(200).json(user?.topGenres);
+  }
 
   const topArtists = await prisma.artist.findMany({
     where: {
@@ -40,7 +43,16 @@ export default async function handler(
 
   genreCountsArray.sort((a, b) => b.count - a.count);
 
-  const top5Genres = genreCountsArray.slice(0, 5);
+  const top5Genres = genreCountsArray.slice(0, 3).map((genre) => genre.genre);
+
+  await prisma.user.update({
+    where: {
+      id: user?.id,
+    },
+    data: {
+      topGenres: top5Genres,
+    },
+  });
 
   return res.status(200).json(top5Genres);
 }

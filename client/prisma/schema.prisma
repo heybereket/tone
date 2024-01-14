@@ -43,6 +43,7 @@ model User {
     accounts          Account[]
     sessions          Session[]
     topArtists        Artist[]
+    topGenres         String[]
     hasFetchedArtists Boolean?
 }
 
@@ -55,7 +56,7 @@ model VerificationToken {
 }
 
 model Artist {
-    id     String  @id @unique
+    id     String   @id @unique
     userId String
     name   String
     image  String?
