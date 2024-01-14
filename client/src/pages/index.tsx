@@ -56,7 +56,8 @@ export default function Home({ genres }: { genres: string[] }) {
     registerUser(genres, (roomId: string) => {
       setCurrentRoom(roomId);
       subscribeToRoom(roomId, (newMessage: string) => {
-        setMessages((prev) => [...prev, newMessage]);
+        console.log(newMessage)
+        setMessages(prev => [...prev, newMessage]);
       });
     });
   };
