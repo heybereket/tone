@@ -43,12 +43,25 @@ io.on("connection", (socket) => {
   });
 });
 
-function tryMatchmaking() {
-  waitingQueue.forEach(async (userId, index) => {
+async function tryMatchmaking() {
+  for (let i = 0; i < waitingQueue.length; i++) {
+    const userId = waitingQueue[i];
+
+    if (!users[userId]) {
+      // Skip if the user doesn't exist (perhaps they disconnected)
+      continue;
+    }
+
     const currentUserGenres = users[userId].genres;
 
-    for (let i = index + 1; i < waitingQueue.length; i++) {
-      const potentialMatchId = waitingQueue[i];
+    for (let j = i + 1; j < waitingQueue.length; j++) {
+      const potentialMatchId = waitingQueue[j];
+
+      if (!users[potentialMatchId]) {
+        // Skip if the potential match doesn't exist (perhaps they disconnected)
+        continue;
+      }
+
       const potentialMatchGenres = users[potentialMatchId].genres;
 
       const commonGenres = currentUserGenres.filter((genre) =>
@@ -70,11 +83,18 @@ function tryMatchmaking() {
           }
         ).then((res) => res.json());
 
-        users[userId].socket.join(roomID);
-        users[potentialMatchId].socket.join(roomID);
+        if (users[userId] && users[potentialMatchId]) {
+          users[userId].socket?.join(roomID); // Use optional chaining to avoid errors
+          users[potentialMatchId].socket?.join(roomID); // Use optional chaining to avoid errors
+        }
 
-        users[userId].socket.emit("matched", roomID);
-        users[potentialMatchId].socket.emit("matched", roomID);
+        if (users[userId]) {
+          users[userId].socket?.emit("matched", roomID); // Use optional chaining to avoid errors
+        }
+
+        if (users[potentialMatchId]) {
+          users[potentialMatchId].socket?.emit("matched", roomID); // Use optional chaining to avoid errors
+        }
 
         io.to(roomID).emit("play_song", topSong.tracks[0].uri);
 
@@ -90,7 +110,7 @@ function tryMatchmaking() {
         return;
       }
     }
-  });
+  }
 }
 
 server.listen(8080, () => {
