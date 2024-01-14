@@ -5,7 +5,8 @@ import { LogoIcon } from "../components/icons/logo";
 import { motion } from "framer-motion";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
-import { Text, Center } from "@chakra-ui/react";
+import { Text, Center as ChakraCenter } from "@chakra-ui/react";
+import { Center } from "@/components/center";
 
 const STEP_ANIMATION = {
   initial: {
@@ -47,9 +48,9 @@ export default function Home() {
       exit={STEP_ANIMATION.exit}
       className="text-black relative h-full w-full"
     >
-      <Center w="100px" h="100px">
+      <ChakraCenter w="100px" h="100px">
         <LogoIcon />
-      </Center>
+      </ChakraCenter>
 
       <center>
         <Text mt={175} fontSize={"5xl"}>
