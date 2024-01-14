@@ -16,8 +16,8 @@ export function Chat({
   message: string;
   setMessage: (message: string) => void;
 }) {
-  console.log(messages)
-  
+  console.log("messages", messages)
+
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {

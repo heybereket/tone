@@ -70,6 +70,8 @@ export default function Home({ genres }: { genres: string[] }) {
     }
   };
 
+  console.log("current room", currentRoom)
+
   return (
     <motion.div
       animate={STEP_ANIMATION.animate}
@@ -127,6 +129,22 @@ export default function Home({ genres }: { genres: string[] }) {
             message={message}
             setMessage={setMessage}
           />
+        )}
+
+{currentRoom && (
+          <div>
+            <p>Connected to room: {currentRoom}</p>
+            {messages.map((msg, index) => (
+              <p key={index}>{msg.message}</p>
+            ))}
+            <input
+              type="text"
+              placeholder="Type a message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <button onClick={handleSendMessage}>Send Message</button>
+          </div>
         )}
       </div>
     </motion.div>

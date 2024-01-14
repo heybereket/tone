@@ -31,7 +31,7 @@ io.on("connection", (socket) => {
   socket.on(
     "send_message",
     (message: string, sender: string, roomId: string) => {
-      io.to(roomId).emit("receive_message", message, sender, roomId);
+      io.to(roomId).emit("receive_message", message, sender);
     }
   );
 
