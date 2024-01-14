@@ -16,8 +16,19 @@ import Chat from "@/components/chat";
 import { Center } from "@/components/center";
 import { Search } from "lucide-react";
 import { SimpleGrid, Box, Text } from "@chakra-ui/react";
+import { fetchSpotifyAPI } from "@/lib/services/spotify";
+import { Account, Artist } from "@prisma/client";
+import { Spotify } from "react-spotify-embed";
 
-export default function MatchPage({ genres }: { genres: string[] }) {
+export default function MatchPage({
+  genres,
+  account,
+  artists,
+}: {
+  genres: string[];
+  account: Account;
+  artists: Artist[];
+}) {
   const { data } = useSession();
 
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
@@ -33,7 +44,7 @@ export default function MatchPage({ genres }: { genres: string[] }) {
     "Bereket",
     "Roozbeh",
   ]);
-  //   const [song, setSong] = useState(null);
+  const [song, setSong] = useState(null);
 
   useEffect(() => {
     connectSocket();
@@ -59,24 +70,26 @@ export default function MatchPage({ genres }: { genres: string[] }) {
     }
   };
 
-  //   useEffect(() => {
-  //     if (currentRoom) {
-  //       const fetchTopSong = async () => {
-  //         const topSong = await fetchSpotifyAPI({
-  //           token: account.access_token as string,
-  //           endpoint: `v1/recommendations/?limit=1&seed_genres=${user.topGenres.join(
-  //             ","
-  //           )}`,
-  //         });
+  useEffect(() => {
+    if (currentRoom) {
+      const fetchTopSong = async () => {
+        const topSong = await fetchSpotifyAPI({
+          token: account.access_token as string,
+          endpoint: `v1/recommendations/?limit=1&seed_genres=${genres.join(
+            ","
+          )}&seed_artists=${artists
+            .slice(0, 1)
+            .map((artist) => artist.id)
+            .join(",")}`,
+        });
 
-  //         setSong(topSong);
-  //       };
+        setSong(topSong.tracks[0].external_urls.spotify);
+      };
 
-  //       fetchTopSong();
-  //     }
-  //   }, [account.access_token, currentRoom, user.topGenres]);
+      fetchTopSong();
+    }
+  }, [account.access_token, artists, currentRoom, genres]);
 
-  //   console.log(song);
 
   return (
     <div>
@@ -88,6 +101,10 @@ export default function MatchPage({ genres }: { genres: string[] }) {
           >
             sign out
           </p>
+        </div>
+
+        <div className="absolute bottom-20 right-3">
+          {song && <Spotify wide link={song} />}
         </div>
 
         <div className="mt-16">
@@ -104,9 +121,9 @@ export default function MatchPage({ genres }: { genres: string[] }) {
             <div className="flex items-center text-center align-center justify-center w-full mt-10">
               <button
                 onClick={handleRegister}
-                className="w-[500px] flex justify-center items-center py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
+                className="w-[600px] flex justify-center items-center py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
               >
-                <Search size={16} className="mr-2" /> Start matchmaking
+                <Search size={16} className="mr-4" /> Start matchmaking
               </button>
             </div>
           )}
@@ -114,31 +131,34 @@ export default function MatchPage({ genres }: { genres: string[] }) {
       </div>
       <center>
         {/* <Text fontWeight={'semibold'} align={'center'}>Your friends.</Text> */}
-        <SimpleGrid
-          justifyItems={"center"}
-          columns={3}
-          spacingX="60px"
-          width={750}
-          height={500}
-          padding={20}
-        >
-          {Object.keys(friendList).map((keyName, i) => (
-            <Box
-              key={i}
-              borderColor="gray"
-              height="60px"
-              width="150px"
-              borderRadius="lg"
-              maxW="sm"
-              borderWidth="1px"
-              overflow="hidden"
-            >
-              <Text mt={4} fontWeight={"semibold"} color="black">
-                {friendList[i]}
-              </Text>
-            </Box>
-          ))}
-        </SimpleGrid>
+        {!currentRoom && (
+          <SimpleGrid
+            justifyItems={"center"}
+            columns={3}
+            spacingX="60px"
+            width={775}
+            height={500}
+            padding={20}
+          >
+            {Object.keys(friendList).map((keyName, i) => (
+              <Box
+                key={i}
+                borderColor="gray"
+                height="60px"
+                width="150px"
+                borderRadius="lg"
+                maxW="sm"
+                borderWidth="1px"
+                overflow="hidden"
+                bgGradient='linear(to-r, green.200, pink.500)'
+              >
+                <Text mt={4} fontWeight={"semibold"} color="black">
+                  {friendList[i]}
+                </Text>
+              </Box>
+            ))}
+          </SimpleGrid>
+        )}
       </center>
     </div>
   );
@@ -159,15 +179,23 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   });
 
-  //   const account = await prisma.account.findFirst({
-  //     where: {
-  //       userId: session.user.id as string,
-  //     },
-  //   });
+  const account = await prisma.account.findFirst({
+    where: {
+      userId: session.user.id as string,
+    },
+  });
+
+  const artists = await prisma.artist.findMany({
+    where: {
+      userId: session.user.id as string,
+    },
+  });
 
   return {
     props: {
-      genres: user?.topGenres ?? [],
+      genres: user?.topGenres,
+      account,
+      artists,
     },
   };
 };

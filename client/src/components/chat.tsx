@@ -28,7 +28,7 @@ export function Chat({
 
   return (
     <div
-      className="w-[600px] space-y-4 mb-10 overflow-y-auto"
+      className="w-[600px] space-y-4 overflow-y-auto"
       ref={chatContainerRef}
     >
       {messages.map((message, index) => (
