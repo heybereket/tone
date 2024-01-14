@@ -79,7 +79,7 @@ export default function MatchPage({
           endpoint: `v1/recommendations/?limit=1&seed_genres=${genres.join(
             ","
           )}&seed_artists=${artists
-            .slice(0, 1)
+            .slice(0, 5)
             .map((artist) => artist.id)
             .join(",")}`,
         });
