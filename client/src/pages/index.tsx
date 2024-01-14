@@ -89,15 +89,11 @@ export default function Home({ genres }: { genres: string[] }) {
       )}
 
       <div className="absolute bottom-0 left-0 right-0 top-60 grid place-items-center">
-        <div className="flex mb-6 items-center justify-center">
+        <div className="mb-6 items-center justify-center">
           <h1 className="text-5xl font-bold text-white text-center mb-2">
-            {/* {status === "authenticated"
+            {status === "authenticated"
               ? `👋 Hi, ${data.user.name}!`
-              : `Welcome to Tone 🎶`} */}
-            Welcome to&nbsp;
-          </h1>
-          <h1 className="font-bold text-5xl font-bold text-white text-center mb-2">
-              Tone.
+              : `Welcome to Tone 🎶`}
           </h1>
           <p>
             {status === "authenticated"
@@ -106,8 +102,7 @@ export default function Home({ genres }: { genres: string[] }) {
           </p>
         </div>
 
-
-        {status === "unauthenticated" && (
+        {/* {status === "unauthenticated" && (
           <button
             className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
             onClick={() => signIn("spotify")}
@@ -123,7 +118,24 @@ export default function Home({ genres }: { genres: string[] }) {
           >
             Start matchmaking
           </button>
-        )}
+        )} */}
+
+        {status === "unauthenticated" ? (
+          <button
+            className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
+            onClick={() => signIn("spotify")}
+          >
+            <SpotifyIcon className="mr-4" /> Sign in with Spotify
+          </button>
+          
+        ) :
+          <button
+            onClick={handleRegister}
+            className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
+          >
+            Start matchmaking
+          </button>
+        }
 
         {currentRoom && (
           <div>
