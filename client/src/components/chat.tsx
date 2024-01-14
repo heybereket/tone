@@ -16,6 +16,8 @@ export function Chat({
   message: string;
   setMessage: (message: string) => void;
 }) {
+  console.log(messages)
+  
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -75,41 +77,27 @@ export function Chat({
 const ChatMessage = ({ message }: { message: Message }) => {
   const { data } = useSession();
 
-  return (
-    <div
-      className={clsx(
-        "flex items-center gap-2",
-        message.sender === data?.user.id ? "pr-36" : "justify-end pl-36"
-      )}
-    >
-      <div
-        className={clsx(
-          "rounded-full bg-gray-600 py-1 px-3 self-end",
-          message.sender === data?.user.id && "ml-auto"
-        )}
-      >
-        {message.sender}
+  if (message.sender === data?.user.id) {
+    return (
+      <div className="flex items-center gap-2 justify-end pl-36">
+        <div className="font-mono py-2 px-4 bg-gray-500 rounded-tl-md rounded-bl-md rounded-tr-md text-left line-clamp-4">
+          {message.message}
+        </div>
+        <div className="rounded-full bg-gray-600 py-1 px-3 self-end">
+          {data.user.name?.slice(0, 1).toUpperCase()}
+        </div>
       </div>
-      <div
-        className={clsx(
-          "font-mono py-2 px-4 rounded-md text-left line-clamp-4",
-          message.sender === "B"
-            ? "bg-blue-500 rounded-tr-md rounded-tl-md rounded-br-md"
-            : "bg-gray-500 rounded-tl-md rounded-bl-md rounded-tr-md"
-        )}
-      >
-        <p
-          className={clsx(
-            "text-lightGray text-xs mt-2",
-            message.sender === "B" ? "flex justify-start" : "flex justify-end"
-          )}
-        >
-          Delivered at {dayjs(new Date().toISOString()).format("h:mm A")}
-        </p>
-        {message.message}
+    );
+  } else {
+    return (
+      <div className="flex items-center gap-2 pr-36">
+        <div className="rounded-full bg-gray-600 py-1 px-3 self-end">??</div>
+        <div className="font-mono py-2 px-4 bg-blue-500 rounded-tr-md rounded-tl-md rounded-br-md text-left tracking-light line-clamp-4">
+          {message.message}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 };
 
 const EnterMessage = ({

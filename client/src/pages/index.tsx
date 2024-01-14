@@ -110,12 +110,14 @@ export default function Home({ genres }: { genres: string[] }) {
             <SpotifyIcon className="mr-4" /> Sign in with Spotify
           </button>
         ) : (
-          <button
-            onClick={handleRegister}
-            className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
-          >
-            Start matchmaking
-          </button>
+          !currentRoom && (
+            <button
+              onClick={handleRegister}
+              className="flex mr-4 cursr-pointer py-2 px-4 rounded-lg bg-card text-lightGray border border-border hover:text-white transition-all duration-300"
+            >
+              Start matchmaking
+            </button>
+          )
         )}
 
         {currentRoom && (
