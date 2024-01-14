@@ -79,21 +79,27 @@ export default function MatchPage({
           endpoint: `v1/recommendations/?limit=1&seed_genres=${genres.join(
             ","
           )}&seed_artists=${artists
-            .slice(0, 5)
+            .slice(0, 2)
             .map((artist) => artist.id)
             .join(",")}`,
         });
 
-        const spotify = new SpotifyFramePlayer();
-        await spotify.loadLibrary();
-        setSpotify(spotify);
-
-        await spotify.playSong(topSong.tracks[0].uri);
+        await spotify?.playSong(topSong.tracks[0].uri);
       };
 
       fetchTopSong();
     }
-  }, [account.access_token, artists, currentRoom, genres]);
+  }, [account.access_token, artists, currentRoom, genres, spotify]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const spotify = new SpotifyFramePlayer();
+      await spotify.loadLibrary();
+      setSpotify(spotify);
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div>
@@ -134,7 +140,6 @@ export default function MatchPage({
         </div>
       </div>
       <center>
-        {/* <Text fontWeight={'semibold'} align={'center'}>Your friends.</Text> */}
         {!currentRoom && (
           <SimpleGrid
             justifyItems={"center"}
