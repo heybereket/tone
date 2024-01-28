@@ -73,7 +73,7 @@ export default function MatchPage({
         });
       }
     );
-  };
+  }; 
 
   const handleSendMessage = () => {
     if (currentRoom && message) {
